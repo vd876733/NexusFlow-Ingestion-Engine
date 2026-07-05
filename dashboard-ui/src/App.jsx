@@ -91,7 +91,7 @@ function App() {
               <div className="flex items-start justify-between gap-4">
                 <div>
                   <p className="text-sm font-medium text-slate-400">Total Event Throughput</p>
-                  <p className="mt-3 font-mono text-3xl font-semibold text-white">{totalEventThroughput}</p>
+                  <p className="mt-3 font-mono text-3xl font-semibold text-white">{loading ? '—' : totalEventThroughput}</p>
                 </div>
                 <div className="rounded-2xl bg-cyan-500/10 p-3 text-cyan-400">
                   <Zap className="h-5 w-5" />
@@ -103,7 +103,7 @@ function App() {
               <div className="flex items-start justify-between gap-4">
                 <div>
                   <p className="text-sm font-medium text-slate-400">Peak Unique Active Audience</p>
-                  <p className="mt-3 font-mono text-3xl font-semibold text-white">{peakUniqueActiveAudience}</p>
+                  <p className="mt-3 font-mono text-3xl font-semibold text-white">{loading ? '—' : peakUniqueActiveAudience}</p>
                 </div>
                 <div className="rounded-2xl bg-indigo-500/10 p-3 text-indigo-400">
                   <Users className="h-5 w-5" />
@@ -167,9 +167,9 @@ function App() {
             </div>
 
             <div className="mt-6 space-y-3">
-              {metrics.map((row) => (
+              {metrics.map((row, index) => (
                 <div
-                  key={`${row.date}-${row.hour}-${row.event_type}`}
+                  key={`${row.name}-${index}`}
                   className="flex items-center justify-between rounded-2xl border border-white/5 bg-slate-950/40 px-4 py-3 transition-transform hover:scale-[1.01]"
                 >
                   <div className="flex items-center gap-3">
@@ -177,13 +177,13 @@ function App() {
                       <BarChart3 className="h-4 w-4" />
                     </div>
                     <div>
-                      <p className="text-sm font-semibold text-slate-100">{row.event_type.replace('_', ' ')}</p>
-                      <p className="text-xs uppercase tracking-[0.2em] text-slate-500">{row.date} • {row.hour}</p>
+                      <p className="text-sm font-semibold text-slate-100">{row.name}</p>
+                      <p className="text-xs uppercase tracking-[0.2em] text-slate-500">{loading ? 'syncing' : 'live'}</p>
                     </div>
                   </div>
                   <div className="flex items-center gap-3">
-                    <span className={`rounded-full border px-2.5 py-1 text-xs font-semibold ${badgeStyles[row.event_type]}`}>
-                      {row.unique_users} users
+                    <span className="rounded-full border border-cyan-500/20 bg-cyan-500/10 px-2.5 py-1 text-xs font-semibold text-cyan-400">
+                      {row.users || 0} users
                     </span>
                     <ArrowRight className="h-4 w-4 text-slate-500" />
                   </div>
@@ -221,20 +221,20 @@ function App() {
                 </tr>
               </thead>
               <tbody className="divide-y divide-slate-800/50 bg-slate-900/20">
-                {metrics.map((row) => (
-                  <tr key={`${row.date}-${row.hour}-${row.event_type}`} className="transition-transform hover:scale-[1.01]">
-                    <td className="whitespace-nowrap px-6 py-4 font-mono text-sm text-slate-300">{row.date}</td>
-                    <td className="whitespace-nowrap px-6 py-4 font-mono text-sm text-slate-300">{row.hour}</td>
+                {transactions.map((row) => (
+                  <tr key={row.id} className="transition-transform hover:scale-[1.01]">
+                    <td className="whitespace-nowrap px-6 py-4 font-mono text-sm text-slate-300">{row.timestamp}</td>
+                    <td className="whitespace-nowrap px-6 py-4 font-mono text-sm text-slate-300">{row.userId}</td>
                     <td className="whitespace-nowrap px-6 py-4 text-sm text-slate-300">
-                      <span className={`inline-flex rounded-full border px-3 py-1 text-sm font-medium ${badgeStyles[row.event_type]}`}>
-                        {row.event_type.replace('_', ' ')}
+                      <span className={`inline-flex rounded-full border px-3 py-1 text-sm font-medium ${badgeStyles[row.eventType] || 'bg-slate-500/10 text-slate-300 border-slate-500/20'}`}>
+                        {row.eventLabel}
                       </span>
                     </td>
                     <td className="whitespace-nowrap px-6 py-4 text-right font-mono text-sm font-semibold text-slate-200">
-                      {row.total_events}
+                      {row.status}
                     </td>
                     <td className="whitespace-nowrap px-6 py-4 text-right font-mono text-sm font-semibold text-slate-200">
-                      {row.unique_users}
+                      {summary.dlq_error_count}
                     </td>
                   </tr>
                 ))}
